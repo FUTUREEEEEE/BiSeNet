@@ -197,6 +197,7 @@ class SegmentBranch(nn.Module):
             GELayerS1(32, 32),
         )
         self.S4 = nn.Sequential(
+            nn.Conv2d(128,32,1,bias=False),
             GELayerS2(32, 64),
             GELayerS1(64, 64),
         )
@@ -209,12 +210,17 @@ class SegmentBranch(nn.Module):
         self.S5_5 = CEBlock()
 
     def forward(self, x):
-        feat2 = self.S1S2(x)
-        feat3 = self.S3(feat2)
-        feat4 = self.S4(feat3)
+        # feat2 = self.S1S2(x)
+        
+        # feat3 = self.S3(feat2)
+        
+        feat4 = self.S4(x)
         feat5_4 = self.S5_4(feat4)
         feat5_5 = self.S5_5(feat5_4)
-        return feat2, feat3, feat4, feat5_4, feat5_5
+        
+        # print("feat2",feat2.size())
+        # print("feat3",feat3.size())
+        return  feat4, feat5_4, feat5_5
 
 
 class BGALayer(nn.Module):
@@ -328,16 +334,18 @@ class BiSeNetV2(nn.Module):
     def forward(self, x):
         size = x.size()[2:]
         feat_d = self.detail(x)
-        feat2, feat3, feat4, feat5_4, feat_s = self.segment(x)
+        # print(feat_d.size())
+        # print(x.size())
+        feat4, feat5_4, feat_s = self.segment(feat_d)
         feat_head = self.bga(feat_d, feat_s)
 
         logits = self.head(feat_head)
         if self.output_aux:
-            logits_aux2 = self.aux2(feat2)
-            logits_aux3 = self.aux3(feat3)
+            #logits_aux2 = self.aux2(feat2)
+            #logits_aux3 = self.aux3(feat3)
             logits_aux4 = self.aux4(feat4)
             logits_aux5_4 = self.aux5_4(feat5_4)
-            return logits, logits_aux2, logits_aux3, logits_aux4, logits_aux5_4
+            return logits, logits_aux4, logits_aux5_4
         pred = logits.argmax(dim=1)
         return pred
 

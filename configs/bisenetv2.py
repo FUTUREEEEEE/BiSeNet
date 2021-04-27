@@ -2,7 +2,7 @@
 ## bisenetv2
 cfg = dict(
     model_type='bisenetv2',
-    num_aux_heads=4,
+    num_aux_heads=2,
     lr_start = 5e-2,
     weight_decay=5e-4,
     warmup_iters = 1000,

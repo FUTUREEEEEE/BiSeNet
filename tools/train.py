@@ -26,6 +26,8 @@ from lib.lr_scheduler import WarmupPolyLrScheduler
 from lib.meters import TimeMeter, AvgMeter
 from lib.logger import setup_logger, print_log_msg
 
+from tensorboardX import SummaryWriter
+
 # apex
 has_apex = True
 try:
@@ -109,13 +111,13 @@ def set_optimizer(model):
 
 def set_model_dist(net):
     if has_apex:
-        net = parallel.DistributedDataParallel(net, delay_allreduce=True)
+        net = parallel.DistributedDataParallel(net, delay_allreduce=True,find_unused_parameters=True)
     else:
         local_rank = dist.get_rank()
         net = nn.parallel.DistributedDataParallel(
             net,
             device_ids=[local_rank, ],
-            output_device=local_rank)
+            output_device=local_rank,find_unused_parameters=True)
     return net
 
 
@@ -129,6 +131,7 @@ def set_meters():
 
 
 def train():
+    tblogger = SummaryWriter("/content/log")
     logger = logging.getLogger()
     is_dist = dist.is_initialized()
 
@@ -185,14 +188,20 @@ def train():
         loss_meter.update(loss.item())
         loss_pre_meter.update(loss_pre.item())
         _ = [mter.update(lss.item()) for mter, lss in zip(loss_aux_meters, loss_aux)]
-
+        #print("it：",it)
         ## print training log message
         if (it + 1) % 100 == 0:
             lr = lr_schdr.get_lr()
             lr = sum(lr) / len(lr)
-            print_log_msg(
+            loss_avg,loss_pre_avg,eta,lr=print_log_msg(
                 it, cfg.max_iter, lr, time_meter, loss_meter,
                 loss_pre_meter, loss_aux_meters)
+            
+            tblogger.add_scalar('loss_avg', loss_avg, it)
+            tblogger.add_scalar('loss_pre_avg', loss_pre_avg, it)
+            tblogger.add_scalar('eta', eta, it)
+            tblogger.add_scalar('lr', lr, it)
+            
 
     ## dump the final model and evaluate the result
     save_pth = osp.join(cfg.respth, 'model_final.pth')
