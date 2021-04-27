@@ -328,6 +328,8 @@ class BiSeNetV2(nn.Module):
     def forward(self, x):
         size = x.size()[2:]
         feat_d = self.detail(x)
+        print(feat_d.size())
+        print(x.size())
         feat2, feat3, feat4, feat5_4, feat_s = self.segment(x)
         feat_head = self.bga(feat_d, feat_s)
 
