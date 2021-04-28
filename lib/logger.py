@@ -44,5 +44,5 @@ def print_log_msg(it, max_iter, lr, time_meter, loss_meter, loss_pre_meter,
         )
     msg += ', ' + loss_aux_avg
     logger = logging.getLogger()
-    logger.info(msg)
+    print(msg)
     return loss_avg,loss_pre_avg,eta,lr

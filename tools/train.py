@@ -199,6 +199,7 @@ def train():
             
             tblogger.add_scalar('loss_avg', loss_avg, it)
             tblogger.add_scalar('loss_pre_avg', loss_pre_avg, it)
+            #tblogger.add_scalar('eta', eta, it)
             tblogger.add_scalar('lr', lr, it)
             
 
