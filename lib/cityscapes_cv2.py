@@ -103,8 +103,8 @@ def get_data_loader(datapth, annpath, ims_per_gpu, scales, cropsize, max_iter=No
         dl = DataLoader(
             ds,
             batch_sampler=batchsampler,
-            num_workers=4,
-            pin_memory=True,
+            num_workers=2,
+            pin_memory=False,
         )
     else:
         dl = DataLoader(
@@ -112,8 +112,8 @@ def get_data_loader(datapth, annpath, ims_per_gpu, scales, cropsize, max_iter=No
             batch_size=batchsize,
             shuffle=shuffle,
             drop_last=drop_last,
-            num_workers=4,
-            pin_memory=True,
+            num_workers=2,
+            pin_memory=False,
         )
     return dl
 
