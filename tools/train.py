@@ -166,6 +166,7 @@ def train():
     ## train loop
     #it=0
     cur_epochs=0
+    cur_it=0
     while True:
       cur_epochs += 1
       
@@ -207,7 +208,7 @@ def train():
               tblogger.add_scalar('loss_pre_avg', loss_pre_avg, it)
               #tblogger.add_scalar('eta', eta, it)
               tblogger.add_scalar('lr', lr, it)
-      if(cur_epochs>2):
+      if(cur_epochs>10):
         break
       cur_it+=it
       print("cur_epochs:",cur_epochs,"cur_it:",cur_it)

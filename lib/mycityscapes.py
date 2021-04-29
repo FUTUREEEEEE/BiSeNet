@@ -181,16 +181,18 @@ def get_data_loader(datapth, annpath, ims_per_gpu, scales, cropsize, max_iter=No
     val_dst = Cityscapes(root=datapth,
                      split='val', transform=val_transform)
     
-    
+
+
     if mode == 'train':
         dl = DataLoader(
         train_dst,
         batch_size=batchsize,
         shuffle=shuffle,
-        drop_last=drop_last,
+        
         num_workers=2,
         pin_memory=False,
-    )
+        )
+        print("len:",len(dl))
         return dl
         
     elif mode == 'val':
