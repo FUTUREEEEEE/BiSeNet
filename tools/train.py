@@ -165,45 +165,53 @@ def train():
 
     ## train loop
     #it=0
-    for  it,(im, lb) in enumerate(dl):
-        
-        im = im.cuda()
-        lb = lb.cuda()
+    cur_epochs=0
+    while True:
+      cur_epochs += 1
+      
+      for  it,(im, lb) in enumerate(dl):
+          
+          im = im.cuda()
+          lb = lb.cuda()
 
-        lb = torch.squeeze(lb, 1)
+          lb = torch.squeeze(lb, 1)
 
-        optim.zero_grad()
-        logits, *logits_aux = net(im)
-        loss_pre = criteria_pre(logits, lb)
-        loss_aux = [crit(lgt, lb) for crit, lgt in zip(criteria_aux, logits_aux)]
-        loss = loss_pre + sum(loss_aux)
-        if has_apex:
-            with amp.scale_loss(loss, optim) as scaled_loss:
-                scaled_loss.backward()
-        else:
-            loss.backward()
-        optim.step()
-        torch.cuda.synchronize()
-        lr_schdr.step()
+          optim.zero_grad()
+          logits, *logits_aux = net(im)
+          loss_pre = criteria_pre(logits, lb)
+          loss_aux = [crit(lgt, lb) for crit, lgt in zip(criteria_aux, logits_aux)]
+          loss = loss_pre + sum(loss_aux)
+          if has_apex:
+              with amp.scale_loss(loss, optim) as scaled_loss:
+                  scaled_loss.backward()
+          else:
+              loss.backward()
+          optim.step()
+          torch.cuda.synchronize()
+          lr_schdr.step()
 
-        time_meter.update()
-        loss_meter.update(loss.item())
-        loss_pre_meter.update(loss_pre.item())
-        _ = [mter.update(lss.item()) for mter, lss in zip(loss_aux_meters, loss_aux)]
-        #print("it：",it)
-        ## print training log message
-        if (it + 1) % 100 == 0:
-            lr = lr_schdr.get_lr()
-            lr = sum(lr) / len(lr)
-            loss_avg,loss_pre_avg,eta,lr=print_log_msg(
-                it, cfg.max_iter, lr, time_meter, loss_meter,
-                loss_pre_meter, loss_aux_meters)
-            
-            tblogger.add_scalar('loss_avg', loss_avg, it)
-            tblogger.add_scalar('loss_pre_avg', loss_pre_avg, it)
-            #tblogger.add_scalar('eta', eta, it)
-            tblogger.add_scalar('lr', lr, it)
-            
+          time_meter.update()
+          loss_meter.update(loss.item())
+          loss_pre_meter.update(loss_pre.item())
+          _ = [mter.update(lss.item()) for mter, lss in zip(loss_aux_meters, loss_aux)]
+          #print("it：",it)
+          ## print training log message
+          if (it + 1) % 100 == 0:
+              lr = lr_schdr.get_lr()
+              lr = sum(lr) / len(lr)
+              loss_avg,loss_pre_avg,eta,lr=print_log_msg(
+                  it, cfg.max_iter, lr, time_meter, loss_meter,
+                  loss_pre_meter, loss_aux_meters)
+              
+              tblogger.add_scalar('loss_avg', loss_avg, it)
+              tblogger.add_scalar('loss_pre_avg', loss_pre_avg, it)
+              #tblogger.add_scalar('eta', eta, it)
+              tblogger.add_scalar('lr', lr, it)
+      if(cur_epochs>2):
+        break
+      cur_it+=it
+      print("cur_epochs:",cur_epochs,"cur_it:",cur_it)
+              
 
     ## dump the final model and evaluate the result
     save_pth = osp.join(cfg.respth, 'model_final.pth')
