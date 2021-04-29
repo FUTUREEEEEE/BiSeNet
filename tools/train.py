@@ -19,7 +19,7 @@ from torch.utils.data import DataLoader
 
 from lib.models import model_factory
 from configs import cfg_factory
-from lib.cityscapes_cv2 import get_data_loader
+from lib.mycityscapes import get_data_loader
 from tools.evaluate import eval_model
 from lib.ohem_ce_loss import OhemCELoss
 from lib.lr_scheduler import WarmupPolyLrScheduler
@@ -164,7 +164,9 @@ def train():
         warmup_ratio=0.1, warmup='exp', last_epoch=-1,)
 
     ## train loop
-    for it, (im, lb) in enumerate(dl):
+    #it=0
+    for  it,(im, lb) in enumerate(dl):
+        
         im = im.cuda()
         lb = lb.cuda()
 

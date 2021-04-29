@@ -161,7 +161,7 @@ def get_data_loader(datapth, annpath, ims_per_gpu, scales, cropsize, max_iter=No
         
     train_transform = et.ExtCompose([
         #et.ExtResize( 512 ),
-        et.ExtRandomCrop(size=(cropsize, cropsize)),
+        et.ExtRandomCrop(size=(cropsize)),
         et.ExtColorJitter( brightness=0.5, contrast=0.5, saturation=0.5 ),
         et.ExtRandomHorizontalFlip(),
         et.ExtToTensor(),
