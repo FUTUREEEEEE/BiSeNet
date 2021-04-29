@@ -205,14 +205,14 @@ def train():
 
     ## dump the final model and evaluate the result
     save_pth = osp.join(cfg.respth, 'model_final.pth')
-    logger.info('\nsave models to {}'.format(save_pth))
+    
     state = net.module.state_dict()
     if dist.get_rank() == 0: torch.save(state, save_pth)
-
-    logger.info('\nevaluating the final model')
+    logger.warning('\nsave models to {}'.format(save_pth))
+    logger.warning('\nevaluating the final model')
     torch.cuda.empty_cache()
     heads, mious = eval_model(net, 2, cfg.im_root, cfg.val_im_anns)
-    logger.info(tabulate([mious, ], headers=heads, tablefmt='orgtbl'))
+    logger.warning(tabulate([mious, ], headers=heads, tablefmt='orgtbl'))
 
     return
 
